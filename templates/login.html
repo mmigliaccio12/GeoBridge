@@ -1,0 +1,224 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Login - CustomSat Insurance Risk Analysis</title>
+    
+    <!-- Bootstrap CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css" rel="stylesheet">
+    
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        .login-container {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+            border-radius: 20px;
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
+            padding: 3rem;
+            width: 100%;
+            max-width: 450px;
+        }
+        
+        .login-header {
+            text-align: center;
+            margin-bottom: 2rem;
+        }
+        
+        .app-logo {
+            width: 80px;
+            height: 80px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            border-radius: 20px;
+            margin: 0 auto 1rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 2rem;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .satellite-logo {
+            width: 45px;
+            height: 45px;
+            fill: white;
+            drop-shadow: 0 2px 4px rgba(0,0,0,0.2);
+        }
+        
+        .app-logo::before {
+            content: '';
+            position: absolute;
+            top: -50%;
+            left: -50%;
+            width: 200%;
+            height: 200%;
+            background: linear-gradient(45deg, transparent, rgba(255,255,255,0.1), transparent);
+            animation: shimmer 3s infinite;
+        }
+        
+        @keyframes shimmer {
+            0% { transform: translateX(-100%) translateY(-100%) rotate(45deg); }
+            100% { transform: translateX(100%) translateY(100%) rotate(45deg); }
+        }
+        
+        .app-title {
+            font-size: 2rem;
+            font-weight: 700;
+            color: #333;
+            margin-bottom: 0.5rem;
+        }
+        
+        .app-subtitle {
+            color: #666;
+            font-size: 0.9rem;
+        }
+        
+        .form-floating > .form-control {
+            border-radius: 12px;
+            border: 2px solid #e9ecef;
+            transition: all 0.3s ease;
+        }
+        
+        .form-floating > .form-control:focus {
+            border-color: #667eea;
+            box-shadow: 0 0 0 0.2rem rgba(102, 126, 234, 0.25);
+        }
+        
+        .btn-login {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            border: none;
+            border-radius: 12px;
+            padding: 0.75rem 2rem;
+            font-weight: 600;
+            transition: all 0.3s ease;
+        }
+        
+        .btn-login:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 20px rgba(102, 126, 234, 0.3);
+        }
+        
+        .demo-info {
+            background: rgba(102, 126, 234, 0.1);
+            border: 1px solid rgba(102, 126, 234, 0.2);
+            border-radius: 12px;
+            padding: 1rem;
+            margin-top: 1.5rem;
+            font-size: 0.85rem;
+        }
+        
+        .alert {
+            border-radius: 12px;
+            border: none;
+        }
+    </style>
+</head>
+<body>
+    <div class="login-container">
+        <div class="login-header">
+            <div class="app-logo">
+                <svg class="satellite-logo" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
+                    <!-- Satellite body -->
+                    <rect x="35" y="40" width="30" height="20" rx="2" fill="white"/>
+                    
+                    <!-- Solar panels -->
+                    <rect x="20" y="42" width="12" height="16" rx="1" fill="white" opacity="0.9"/>
+                    <rect x="68" y="42" width="12" height="16" rx="1" fill="white" opacity="0.9"/>
+                    
+                    <!-- Solar panel details -->
+                    <line x1="22" y1="44" x2="30" y2="44" stroke="#667eea" stroke-width="0.5"/>
+                    <line x1="22" y1="46" x2="30" y2="46" stroke="#667eea" stroke-width="0.5"/>
+                    <line x1="22" y1="48" x2="30" y2="48" stroke="#667eea" stroke-width="0.5"/>
+                    <line x1="22" y1="50" x2="30" y2="50" stroke="#667eea" stroke-width="0.5"/>
+                    <line x1="22" y1="52" x2="30" y2="52" stroke="#667eea" stroke-width="0.5"/>
+                    <line x1="22" y1="54" x2="30" y2="54" stroke="#667eea" stroke-width="0.5"/>
+                    <line x1="22" y1="56" x2="30" y2="56" stroke="#667eea" stroke-width="0.5"/>
+                    
+                    <line x1="70" y1="44" x2="78" y2="44" stroke="#667eea" stroke-width="0.5"/>
+                    <line x1="70" y1="46" x2="78" y2="46" stroke="#667eea" stroke-width="0.5"/>
+                    <line x1="70" y1="48" x2="78" y2="48" stroke="#667eea" stroke-width="0.5"/>
+                    <line x1="70" y1="50" x2="78" y2="50" stroke="#667eea" stroke-width="0.5"/>
+                    <line x1="70" y1="52" x2="78" y2="52" stroke="#667eea" stroke-width="0.5"/>
+                    <line x1="70" y1="54" x2="78" y2="54" stroke="#667eea" stroke-width="0.5"/>
+                    <line x1="70" y1="56" x2="78" y2="56" stroke="#667eea" stroke-width="0.5"/>
+                    
+                    <!-- Antenna/Communication dish -->
+                    <circle cx="50" cy="35" r="8" fill="none" stroke="white" stroke-width="2"/>
+                    <circle cx="50" cy="35" r="4" fill="none" stroke="white" stroke-width="1"/>
+                    <line x1="50" y1="27" x2="50" y2="40" stroke="white" stroke-width="1.5"/>
+                    
+                    <!-- Signal waves -->
+                    <path d="M 45 25 Q 50 20 55 25" fill="none" stroke="white" stroke-width="1" opacity="0.7"/>
+                    <path d="M 42 22 Q 50 15 58 22" fill="none" stroke="white" stroke-width="0.8" opacity="0.5"/>
+                    <path d="M 40 19 Q 50 10 60 19" fill="none" stroke="white" stroke-width="0.6" opacity="0.3"/>
+                    
+                    <!-- Earth scan beam -->
+                    <path d="M 35 60 L 50 65 L 65 60 L 50 55 Z" fill="white" opacity="0.3"/>
+                    <line x1="50" y1="60" x2="50" y2="75" stroke="white" stroke-width="1" opacity="0.6"/>
+                    
+                    <!-- Earth representation -->
+                    <circle cx="50" cy="85" r="8" fill="white" opacity="0.8"/>
+                    <path d="M 45 82 Q 50 78 55 82 Q 52 88 48 85 Z" fill="#667eea" opacity="0.6"/>
+                </svg>
+            </div>
+            <h1 class="app-title">CustomSat</h1>
+            <p class="app-subtitle">Insurance Risk Analysis Platform</p>
+        </div>
+        
+        <!-- Flash Messages -->
+        {% with messages = get_flashed_messages(with_categories=true) %}
+            {% if messages %}
+                {% for category, message in messages %}
+                    <div class="alert alert-{{ 'danger' if category == 'error' else 'success' if category == 'success' else 'info' }} alert-dismissible fade show" role="alert">
+                        {{ message }}
+                        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                    </div>
+                {% endfor %}
+            {% endif %}
+        {% endwith %}
+        
+        <form method="POST">
+            <div class="form-floating mb-3">
+                <input type="email" class="form-control" id="email" name="email" placeholder="name@example.com" required>
+                <label for="email">Email address</label>
+            </div>
+            
+            <div class="form-floating mb-4">
+                <input type="password" class="form-control" id="password" name="password" placeholder="Password" required>
+                <label for="password">Password</label>
+            </div>
+            
+            <div class="d-grid">
+                <button class="btn btn-primary btn-login" type="submit">
+                    <i class="bi bi-box-arrow-in-right me-2"></i>
+                    Sign In
+                </button>
+            </div>
+        </form>
+        
+        <!-- Demo Information -->
+        <div class="demo-info">
+            <strong><i class="bi bi-info-circle me-2"></i>Demo Access:</strong><br>
+            <strong>Email:</strong> admin@customsat.it<br>
+            <strong>Password:</strong> password
+        </div>
+    </div>
+    
+    <!-- Bootstrap JS -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html> 

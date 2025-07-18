@@ -1,0 +1,367 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CustomSat Insurance Risk Analysis</title>
+    
+    <!-- Bootstrap CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css" rel="stylesheet">
+    
+    <!-- Leaflet CSS -->
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.3/dist/leaflet.css" />
+    <link rel="stylesheet" href="https://unpkg.com/leaflet-draw@1.0.4/dist/leaflet.draw.css" />
+    
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    
+    <!-- Custom CSS -->
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+</head>
+<body>
+    <div class="app-container">
+        <!-- Sidebar -->
+        <aside class="sidebar">
+            <div class="sidebar-header">
+                <h1 class="app-title">CustomSat</h1>
+                <div class="app-subtitle">Insurance Risk Analysis</div>
+            </div>
+            
+            <div class="sidebar-content">
+                <!-- Normal Analysis Controls -->
+                <div id="analysis-controls" class="analysis-controls">
+                    <!-- Search Box -->
+                    <div class="search-container">
+                        <div class="input-group">
+                            <input type="text" id="location-search" class="form-control" placeholder="Search for a location..." autocomplete="off">
+                            <button id="search-btn" class="btn btn-primary">
+                                <i class="bi bi-search"></i>
+                            </button>
+                        </div>
+                        <div id="search-suggestions" class="search-suggestions"></div>
+                    </div>
+                    
+                    <!-- Controls Panel -->
+                    <div class="control-panel">
+                        <h3 class="panel-title">Analysis Controls</h3>
+                        <p class="panel-description">Select an area on the map using the drawing tools for risk analysis.</p>
+                        
+                        <!-- Analysis Mode Selection -->
+                        <div class="analysis-mode-selection mb-3">
+                            <div class="btn-group w-100" role="group" aria-label="Analysis mode">
+                                <input type="radio" class="btn-check" name="analysis-mode" id="current-analysis" value="current" checked>
+                                <label class="btn btn-outline-primary" for="current-analysis">
+                                    <i class="bi bi-camera"></i> Standard Analysis
+                                </label>
+                                
+                                <input type="radio" class="btn-check" name="analysis-mode" id="trend-analysis" value="trend">
+                                <label class="btn btn-outline-primary" for="trend-analysis">
+                                    <i class="bi bi-graph-up-arrow"></i> Trend Analysis
+                                </label>
+                            </div>
+                        </div>
+                        
+                        <!-- Time Range Controls (for trend analysis) -->
+                        <div id="time-range-controls" class="time-range-controls" style="display: none;">
+                            <div class="row g-2 mb-3">
+                                <div class="col-6">
+                                    <label for="start-date" class="form-label small">Start Date</label>
+                                    <input type="date" class="form-control form-control-sm" id="start-date" value="2022-01-01">
+                                </div>
+                                <div class="col-6">
+                                    <label for="end-date" class="form-label small">End Date</label>
+                                    <input type="date" class="form-control form-control-sm" id="end-date">
+                                </div>
+                            </div>
+                            <div class="mb-3">
+                                <label for="time-interval" class="form-label small">Analysis Interval</label>
+                                <select class="form-select form-select-sm" id="time-interval">
+                                    <option value="3">Every 3 months</option>
+                                    <option value="6" selected>Every 6 months</option>
+                                    <option value="12">Every 12 months</option>
+                                </select>
+                            </div>
+                        </div>
+                        
+                        <!-- Selected Area Info -->
+                        <div id="area-info" class="area-info-panel" style="display: none;">
+                            <div class="area-info-content">
+                                <div class="area-info-item">
+                                    <i class="bi bi-bounding-box"></i>
+                                    <span class="area-label">Selected Area:</span>
+                                    <span id="area-size" class="area-value">0 km²</span>
+                                </div>
+                                <div class="area-info-item">
+                                    <i class="bi bi-geo-alt"></i>
+                                    <span class="area-label">Coordinates:</span>
+                                    <span id="area-coords" class="area-value">-</span>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="d-grid gap-2 mt-3">
+                            <button id="analyze-btn" class="btn btn-primary" disabled>
+                                <i class="bi bi-graph-up"></i> <span id="analyze-btn-text">Analyze Selected Area</span>
+                            </button>
+                            <button id="reset-btn" class="btn btn-outline-secondary">
+                                <i class="bi bi-arrow-counterclockwise"></i> Reset
+                            </button>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Layer Viewing State (Hidden by default) -->
+                <div id="layer-view-controls" class="layer-view-controls" style="display: none;">
+                    <div class="control-panel">
+                        <h3 class="panel-title">
+                            <i class="bi bi-layers"></i> Layer View
+                        </h3>
+                        
+                        <!-- Current Layer Info -->
+                        <div class="layer-info-panel">
+                            <div class="layer-info-content">
+                                <div class="layer-info-item">
+                                    <i class="bi bi-eye"></i>
+                                    <span class="layer-label">Viewing:</span>
+                                    <span id="current-layer-name" class="layer-value">-</span>
+                                </div>
+                                <div class="layer-info-item">
+                                    <i class="bi bi-geo-alt"></i>
+                                    <span class="layer-label">Area:</span>
+                                    <span id="layer-area-coords" class="layer-value">-</span>
+                                </div>
+                                <div class="layer-info-item">
+                                    <i class="bi bi-shield-exclamation"></i>
+                                    <span class="layer-label">Overall Risk:</span>
+                                    <span id="layer-risk-score" class="layer-value">-</span>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="d-grid gap-2 mt-3">
+                            <button id="back-to-report-btn" class="btn btn-success">
+                                <i class="bi bi-arrow-left"></i> Back to Report
+                            </button>
+                            <button id="hide-layer-btn" class="btn btn-outline-secondary">
+                                <i class="bi bi-eye-slash"></i> Hide Layer
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="sidebar-footer">
+                <div class="user-info mb-2">
+                    <i class="bi bi-person-circle"></i>
+                    <small class="text-muted">{{ session.user_email }}</small>
+                </div>
+                <div class="d-grid mb-2">
+                    <a href="{{ url_for('logout') }}" class="btn btn-outline-secondary btn-sm">
+                        <i class="bi bi-box-arrow-right"></i> Logout
+                    </a>
+                </div>
+                <p>© 2024 CustomSat Analytics</p>
+            </div>
+        </aside>
+        
+        <!-- Main Content -->
+        <main class="main-content">
+            <div class="map-container">
+                <div id="map"></div>
+            </div>
+        </main>
+    </div>
+    
+    <!-- Loading Progress Modal (Made even smaller) -->
+    <div class="modal fade" id="loadingModal" tabindex="-1" aria-labelledby="loadingModalLabel" aria-hidden="true" data-bs-backdrop="static" data-bs-keyboard="false">
+        <div class="modal-dialog modal-sm modal-dialog-centered" style="max-width: 600px;">
+            <div class="modal-content">
+                <div class="modal-header border-0 pb-1">
+                    <h6 class="modal-title" id="loadingModalLabel">
+                        <i class="bi bi-hourglass-split text-primary"></i> 
+                        Analyzing
+                    </h6>
+                </div>
+                <div class="modal-body text-center py-2">
+                    <div class="spinner mb-2"></div>
+                    <div id="loading-progress-text" class="mb-2 small">
+                        Initializing...
+                    </div>
+                    <div class="progress mb-2" style="height: 10px;">
+                        <div id="loading-progress-bar" class="progress-bar progress-bar-striped progress-bar-animated" role="progressbar" style="width: 0%"></div>
+                    </div>
+                    <div id="loading-details" class="small text-muted">
+                        Preparing requests...
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Detailed Report Modal (Made less wide) -->
+    <div class="modal fade" id="detailedReportModal" tabindex="-1" aria-labelledby="detailedReportModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-md">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="detailedReportModalLabel">
+                        <i class="bi bi-file-earmark-bar-graph text-primary"></i> 
+                        <span id="report-modal-title">Risk Analysis Report</span>
+                    </h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <!-- Overall Risk Summary -->
+                    <div class="card mb-3">
+                        <div class="card-header">
+                            <h6 class="card-title mb-0">
+                                <i class="bi bi-shield-exclamation text-danger"></i> Overall Risk Assessment
+                            </h6>
+                        </div>
+                        <div class="card-body">
+                            <div class="row align-items-center">
+                                <div class="col-md-4">
+                                    <div class="text-center">
+                                        <span id="detailed-risk-score" class="display-4 fw-bold text-danger">0.0</span>
+                                        <span class="text-muted">/10</span>
+                                        <br>
+                                        <span id="detailed-risk-level" class="badge bg-secondary">Low Risk</span>
+                                    </div>
+                                </div>
+                                <div class="col-md-8">
+                                    <div class="row">
+                                        <div class="col-6">
+                                            <small class="text-muted">Area Size:</small>
+                                            <div id="detailed-area-size">0 km²</div>
+                                        </div>
+                                        <div class="col-6">
+                                            <small class="text-muted">Analysis Date:</small>
+                                            <div id="detailed-analysis-date">-</div>
+                                        </div>
+                                    </div>
+                                    <div class="mt-2">
+                                        <small class="text-muted">Coordinates:</small>
+                                        <div id="detailed-coordinates" class="small">-</div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Individual Risk Factors -->
+                    <div class="card mb-3">
+                        <div class="card-header">
+                            <h6 class="card-title mb-0">
+                                <i class="bi bi-list-check text-warning"></i> Risk Factors Analysis
+                            </h6>
+                        </div>
+                        <div class="card-body">
+                            <div id="detailed-risk-factors" class="row g-2">
+                                <!-- Risk factors will be populated here -->
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- AI Interpretation Section -->
+                    <div class="card mb-3">
+                        <div class="card-header">
+                            <h6 class="card-title mb-0">
+                                <i class="bi bi-robot text-primary"></i> AI Risk Analysis Interpretation
+                            </h6>
+                        </div>
+                        <div class="card-body">
+                            <div id="ai-interpretation" class="ai-interpretation">
+                                <div class="text-center py-3">
+                                    <div class="spinner-border text-primary" role="status">
+                                        <span class="visually-hidden">Loading...</span>
+                                    </div>
+                                    <p class="mt-2 text-muted">Generating AI interpretation...</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Trend Analysis Charts (shown only for trend analysis) -->
+                    <div id="trend-charts-container" class="card mb-3" style="display: none;">
+                        <div class="card-header">
+                            <h6 class="card-title mb-0">
+                                <i class="bi bi-graph-up text-success"></i> Trend Analysis
+                            </h6>
+                        </div>
+                        <div class="card-body">
+                            <!-- Overall Trend Chart -->
+                            <div class="mb-4">
+                                <h6>Overall Risk Trend</h6>
+                                <div class="chart-container">
+                                    <canvas id="overall-trend-chart" width="400" height="200"></canvas>
+                                </div>
+                            </div>
+                            
+                            <!-- Individual Factor Trend Charts -->
+                            <div id="factor-trend-charts" class="row g-3">
+                                <!-- Individual charts will be populated here -->
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Satellite Layers -->
+                    <div class="card">
+                        <div class="card-header">
+                            <h6 class="card-title mb-0">
+                                <i class="bi bi-layers text-info"></i> Satellite Layers
+                                <small class="text-muted">(Click to view on map)</small>
+                            </h6>
+                        </div>
+                        <div class="card-body">
+                            <div id="detailed-layers-grid" class="row g-2">
+                                <!-- Layers will be populated here -->
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">
+                        <i class="bi bi-x-lg"></i> Close
+                    </button>
+                    <button type="button" class="btn btn-primary" id="detailed-download-pdf-btn">
+                        <i class="bi bi-download"></i> Download PDF Report
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Error Modal -->
+    <div class="modal fade" id="error-modal" tabindex="-1" aria-labelledby="errorModalLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header bg-danger text-white">
+                    <h5 class="modal-title" id="errorModalLabel">
+                        <i class="bi bi-exclamation-triangle"></i> Error
+                    </h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <p id="error-message">An error occurred during the analysis.</p>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Leaflet JS -->
+    <script src="https://unpkg.com/leaflet@1.9.3/dist/leaflet.js"></script>
+    <script src="https://unpkg.com/leaflet-draw@1.0.4/dist/leaflet.draw.js"></script>
+    
+    <!-- Bootstrap JS -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.bundle.min.js"></script>
+    
+    <!-- Chart.js for trend visualization (using more stable version) -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@3.9.1/dist/chart.min.js"></script>
+    
+    <!-- Custom JS -->
+    <script src="{{ url_for('static', filename='js/main.js') }}"></script>
+</body>
+</html> 

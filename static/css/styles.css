@@ -1,0 +1,45 @@
+/* AI Interpretation Styling */
+.ai-interpretation {
+    font-size: 0.95rem;
+    line-height: 1.6;
+}
+
+.ai-interpretation h2 {
+    color: #2c3e50;
+    font-size: 1.4rem;
+    font-weight: 600;
+    margin-top: 1.5rem;
+    margin-bottom: 1rem;
+}
+
+.ai-interpretation h3 {
+    color: #34495e;
+    font-size: 1.2rem;
+    font-weight: 500;
+    margin-top: 1.2rem;
+    margin-bottom: 0.8rem;
+}
+
+.ai-interpretation p {
+    color: #4a5568;
+    margin-bottom: 0.8rem;
+}
+
+.ai-interpretation strong {
+    color: #2d3748;
+    font-weight: 600;
+}
+
+.ai-interpretation ul {
+    padding-left: 1.5rem;
+    margin-bottom: 1rem;
+}
+
+.ai-interpretation li {
+    color: #4a5568;
+    margin-bottom: 0.5rem;
+}
+
+.ai-interpretation li:last-child {
+    margin-bottom: 0;
+} 
